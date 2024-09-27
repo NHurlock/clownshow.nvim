@@ -2,7 +2,7 @@ local utils = require("clownshow.utils")
 
 local M = {}
 
----@type table<string, Query>
+---@type table<string, vim.treesitter.Query>
 local _queries = {}
 ---@type fun(): string
 local function _jest_query()
@@ -55,7 +55,7 @@ end
 -- generate query for given filetype if one does not already exist
 -- only need to do this once
 ---@param filetype string file type
----@return Query query treesitter query for the filetype
+---@return vim.treesitter.Query query treesitter query for the filetype
 function M.get_filetype_query(filetype)
   if not _queries[filetype] then
     _queries[filetype] = vim.treesitter.query.parse(filetype, _jest_query())

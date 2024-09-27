@@ -8,7 +8,7 @@ local Config = require("clownshow.config")
 ---@class ClownshowDiagnostics
 ---@field _bufnr number
 ---@field _file_name string
----@field diagnostics Diagnostic[]
+---@field diagnostics vim.Diagnostic[]
 ---@overload fun(bufnr: number, file_name: string): ClownshowDiagnostics
 local Diagnostics = Object("ClownshowDiagnostics")
 
@@ -74,7 +74,7 @@ function Diagnostics:create(identifier, message)
     end
   end
 
-  ---@type Diagnostic
+  ---@type vim.Diagnostic
   local diagnostic = {
     bufnr = self._bufnr,
     lnum = err_line or identifier.line,

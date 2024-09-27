@@ -5,7 +5,7 @@ local identifier_utils = require("clownshow.identifiers.utils")
 ---@class ClownshowIdentifierParser
 ---@field _bufnr number
 ---@field _file_type string
----@field _parser LanguageTree
+---@field _parser vim.treesitter.LanguageTree
 ---@field _root_has_only boolean
 ---@field _curr_parent? number
 ---@field _holding? number
@@ -116,27 +116,33 @@ function Parser:_refresh()
     self._holding = nil
     self._each = {}
 
-    for id, node in pairs(match) do
+    for id, nodes in pairs(match) do
       local name = query.captures[id]
-      local range = { node:range() }
-      ---@type ClownshowIdentifierProps
-      local identifier = {
-        type = identifier_utils.get_type(name),
-        line = range[1],
-        col = range[2],
-        endline = range[3],
-        status = identifier_utils.get_initial_status(name),
-        only = string.match(name, "only") ~= nil
-      }
+      -- backwards compatibility
+      if not vim.islist(nodes) then
+        nodes = { nodes }
+      end
+      for _, node in ipairs(nodes) do
+        local range = { node:range() }
+        ---@type ClownshowIdentifierProps
+        local identifier = {
+          type = identifier_utils.get_type(name),
+          line = range[1],
+          col = range[2],
+          endline = range[3],
+          status = identifier_utils.get_initial_status(name),
+          only = string.match(name, "only") ~= nil
+        }
 
-      if string.match(name, "each") then
-        self:_set_each(identifier)
-      elseif not string.match(name, "args") then
-        self:_add_identifier(identifier)
-      elseif name == "inner_args" then
-        self:_add_each(identifier, self._each["test"] or self._each["describe"])
-      elseif name == "args" then
-        self:_add_each(identifier, self._each["root"])
+        if string.match(name, "each") then
+          self:_set_each(identifier)
+        elseif not string.match(name, "args") then
+          self:_add_identifier(identifier)
+        elseif name == "inner_args" then
+          self:_add_each(identifier, self._each["test"] or self._each["describe"])
+        elseif name == "args" then
+          self:_add_each(identifier, self._each["root"])
+        end
       end
     end
 
